@@ -1,35 +1,68 @@
 import unittest
-import prob_calculator
+from time_calculator import add_time
 
-prob_calculator.random.seed(95)
+
 class UnitTests(unittest.TestCase):
-    def test_hat_class_contents(self):
-        hat = prob_calculator.Hat(red=3,blue=2)
-        actual = hat.contents
-        expected = ["red","red","red","blue","blue"]
-        self.assertEqual(actual, expected, 'Expected creation of hat object to add correct contents.')
+    maxDiff = None
+    def test_same_period(self):
+        actual = add_time("3:30 PM", "2:12")
+        expected = "5:42 PM"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "3:30 PM", "2:12" to return "5:42 PM"')
 
-    def test_hat_draw(self):
-        hat = prob_calculator.Hat(red=5,blue=2)
-        actual = hat.draw(2)
-        expected = ['blue', 'red']
-        self.assertEqual(actual, expected, 'Expected hat draw to return two random items from hat contents.')
-        actual = len(hat.contents)
-        expected = 5
-        self.assertEqual(actual, expected, 'Expected hat draw to reduce number of items in contents.')
+    def test_different_period(self):
+        actual = add_time("11:55 AM", "3:12")
+        expected = "3:07 PM"
+        self.assertEqual(actual, expected, 'Expected calling "ad0d_time()" with "11:55 AM", "3:12" to return "3:07 PM"')
 
-    def test_prob_experiment(self):
-        hat = prob_calculator.Hat(blue=3,red=2,green=6)
-        probability = prob_calculator.experiment(hat=hat, expected_balls={"blue":2,"green":1}, num_balls_drawn=4, num_experiments=1000)
-        actual = probability
-        expected = 0.272
-        self.assertAlmostEqual(actual, expected, delta = 0.01, msg = 'Expected experiment method to return a different probability.')
-        hat = prob_calculator.Hat(yellow=5,red=1,green=3,blue=9,test=1)
-        probability = prob_calculator.experiment(hat=hat, expected_balls={"yellow":2,"blue":3,"test":1}, num_balls_drawn=20, num_experiments=100)
-        actual = probability
-        expected = 1.0
-        self.assertAlmostEqual(actual, expected, delta = 0.01, msg = 'Expected experiment method to return a different probability.')
+    def test_next_day(self):
+        actual = add_time("9:15 PM", "5:30")
+        expected = "2:45 AM (next day)"
+        self.assertEqual(actual, expected, 'Expected time to end with "(next day)" when it is the next day.')
 
+    def test_period_change_at_twelve(self):
+        actual = add_time("11:40 AM", "0:25")
+        expected = "12:05 PM"
+        self.assertEqual(actual, expected, 'Expected period to change from AM to PM at 12:00')
+
+    def test_twenty_four(self):
+        actual = add_time("2:59 AM", "24:00")
+        expected = "2:59 AM (next day)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "2:59 AM", "24:00" to return "2:59 AM"')
+
+    def test_two_days_later(self):
+        actual = add_time("11:59 PM", "24:05")
+        expected = "12:04 AM (2 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "11:59 PM", "24:05" to return "12:04 AM (2 days later)"')
+
+    def test_high_duration(self):
+        actual = add_time("8:16 PM", "466:02")
+        expected = "6:18 AM (20 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "8:16 PM", "466:02" to return "6:18 AM (20 days later)"')
+
+    def test_no_change(self):
+        actual = add_time("5:01 AM", "0:00")
+        expected = "5:01 AM"
+        self.assertEqual(actual, expected, 'Expected adding 0:00 to return initial time.')
+
+    def test_same_period_with_day(self):
+        actual = add_time("3:30 PM", "2:12", "Monday")
+        expected = "5:42 PM, Monday"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "3:30 PM", "2:12", "Monday" to return "5:42 PM, Monday"')
+
+    def test_twenty_four_with_day(self):
+        actual = add_time("2:59 AM", "24:00", "saturDay")
+        expected = "2:59 AM, Sunday (next day)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "2:59 AM", "24:00", "saturDay" to return "2:59 AM, Sunday (next day)"')
+
+    def test_two_days_later_with_day(self):
+        actual = add_time("11:59 PM", "24:05", "Wednesday")
+        expected = "12:04 AM, Friday (2 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "11:59 PM", "24:05", "Wednesday" to return "12:04 AM, Friday (2 days later)"')
+
+    def test_high_duration_with_day(self):
+        actual = add_time("8:16 PM", "466:02", "tuesday")
+        expected = "6:18 AM, Monday (20 days later)"
+        self.assertEqual(actual, expected, 'Expected calling "add_time()" with "8:16 PM", "466:02", "tuesday" to return "6:18 AM, Monday (20 days later)"')
 
 if __name__ == "__main__":
     unittest.main()
